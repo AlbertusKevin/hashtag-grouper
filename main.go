@@ -1,5 +1,11 @@
 package main
 
+import (
+	"fmt"
+	"math/rand"
+	"strings"
+)
+
 func main() {
 	var hashtagGroupPerNiche = map[string]map[string]string{}
 
@@ -32,4 +38,49 @@ func main() {
 	hashtagGroupPerNiche["self improvement"]["high"] = `#selfconfidence #selfempowerment #personalgrowth #selfgrowth #selfworth #personaldevelopment #selfimprovement #selfhelp #selfdiscovery #changeyourlife #innerstrength #selfrespect #selfesteem #bethebestyou #beyourbestself #youmatter`
 	hashtagGroupPerNiche["self improvement"]["medium"] = `#selfimprovementdaily #selfmastery #becomebetter #strongmind #mindpower #positiveselftalk #findyourpurpose #healthyboundaries #personaldevelopmentjourney #selfdevelopmentjourney #selfdiscipline #selfeducation #selfmotivated #improveyourself #betteryourself #personalgrowthanddevelopment #selfgrowthjourney #personaljourney #smallsteps #yourjourney #lifejourney #selfhelptips #overcomingobstacles #selfaffirmation #valueyourself #selfvalue #overcomefear #selfactualization #thejourney #pengembangandiri`
 	hashtagGroupPerNiche["self improvement"]["low"] = `#improvementofself #selfimprovements #selfimprovementquotes #selfimprovementtips #selfimprovementjourney #selfimprovementeveryday #selfimprovementsdaily #selfimprovementmovement #selfimprovementgoals #selfdevelopement #controlyourmind #lifemastery #selfimprove #selﬁmprovement #berubahlebihbaik #confidencefromwithin #lifeimprovement`
+
+	// ctx, _ := json.MarshalIndent(hashtagGroupPerNiche["self improvement"], "", "\t")
+	// fmt.Println("json:", string(ctx))
+
+	makeGroup(5, 20, hashtagGroupPerNiche["self reminder"])
+}
+
+func makeGroup(nGroupResult int, nHashtag int, hashtagGroupPerNiche map[string]string){
+	var highRatio float64 = 1
+	var mediumRatio float64 = 3
+	var lowRatio float64 = 5
+	var total float64 = highRatio + mediumRatio + lowRatio
+
+	// hitung jumlah hashtag dalam grup sesuai ratio dari masing-masing tingkat reachment
+	countHighHashtagGroup := (highRatio/total)  * float64(nHashtag)
+	countMediumHashtagGroup := (mediumRatio/total) * float64(nHashtag)
+	countLowHashtagGroup := (lowRatio/total) * float64(nHashtag)
+
+	// jadikan string menjadi slice of string
+	highReachmentHashtags := strings.Split(hashtagGroupPerNiche["high"]," ")
+	mediumReachmentHashtags := strings.Split(hashtagGroupPerNiche["medium"]," ")
+	lowReachmentHashtags := strings.Split(hashtagGroupPerNiche["low"]," ")
+
+	for i := 0; i < int(countHighHashtagGroup); i++ {
+		randIdx := rand.Intn(len(highReachmentHashtags))
+		fmt.Println("len high:",len(highReachmentHashtags));
+		fmt.Println("high:",randIdx);
+	}
+
+	for i := 0; i < int(countMediumHashtagGroup); i++ {
+		randIdx := rand.Intn(len(mediumReachmentHashtags))
+		fmt.Println("len medium:",len(mediumReachmentHashtags));
+		fmt.Println("medium:",randIdx);
+	}
+
+	for i := 0; i < int(countLowHashtagGroup); i++ {
+		randIdx := rand.Intn(len(lowReachmentHashtags))
+		fmt.Println("len low:",len(lowReachmentHashtags));
+		fmt.Println("low:",randIdx);
+	}
+	
+
+	// fmt.Println(math.Round(countHighHashtagGroup));
+	// fmt.Println(math.Round(countMediumHashtagGroup));
+	// fmt.Println(math.Round(countLowHashtagGroup));
 }
