@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -39,16 +40,24 @@ func main() {
 	hashtagGroupPerNiche["self improvement"]["medium"] = `#selfimprovementdaily #selfmastery #becomebetter #strongmind #mindpower #positiveselftalk #findyourpurpose #healthyboundaries #personaldevelopmentjourney #selfdevelopmentjourney #selfdiscipline #selfeducation #selfmotivated #improveyourself #betteryourself #personalgrowthanddevelopment #selfgrowthjourney #personaljourney #smallsteps #yourjourney #lifejourney #selfhelptips #overcomingobstacles #selfaffirmation #valueyourself #selfvalue #overcomefear #selfactualization #thejourney #pengembangandiri`
 	hashtagGroupPerNiche["self improvement"]["low"] = `#improvementofself #selfimprovements #selfimprovementquotes #selfimprovementtips #selfimprovementjourney #selfimprovementeveryday #selfimprovementsdaily #selfimprovementmovement #selfimprovementgoals #selfdevelopement #controlyourmind #lifemastery #selfimprove #selﬁmprovement #berubahlebihbaik #confidencefromwithin #lifeimprovement`
 
-	// ctx, _ := json.MarshalIndent(hashtagGroupPerNiche["self improvement"], "", "\t")
-	// fmt.Println("json:", string(ctx))
-
-	makeGroup(5, 20, hashtagGroupPerNiche["self reminder"])
+	makeHashtagNicheGroup(5, 20, hashtagGroupPerNiche["self reminder"])
 }
 
-func makeGroup(nGroupResult int, nHashtag int, hashtagGroupPerNiche map[string]string){
+func makeHashtagNicheGroup(nGroupResult int, nHashtag int, hashtagGroupPerNiche map[string]string){
+	// hasil grup akhir
+	finalGroup := map[int][]string{}
+
+	// map untuk jumlah group per reachment
+	highGroup := map[int][]string{}
+	mediumGroup := map[int][]string{}
+	lowGroup := map[int][]string{}
+
+
+	// rasio komposisi hashtag dari setiap grup
 	var highRatio float64 = 1
 	var mediumRatio float64 = 3
 	var lowRatio float64 = 5
+
 	var total float64 = highRatio + mediumRatio + lowRatio
 
 	// hitung jumlah hashtag dalam grup sesuai ratio dari masing-masing tingkat reachment
@@ -61,26 +70,46 @@ func makeGroup(nGroupResult int, nHashtag int, hashtagGroupPerNiche map[string]s
 	mediumReachmentHashtags := strings.Split(hashtagGroupPerNiche["medium"]," ")
 	lowReachmentHashtags := strings.Split(hashtagGroupPerNiche["low"]," ")
 
-	for i := 0; i < int(countHighHashtagGroup); i++ {
-		randIdx := rand.Intn(len(highReachmentHashtags))
-		fmt.Println("len high:",len(highReachmentHashtags));
-		fmt.Println("high:",randIdx);
+	// buat n grup per masing-masing level
+	for i := 0; i < nGroupResult; i++{
+		highGroup[i] = makeReachmentGroup(int(countHighHashtagGroup), highReachmentHashtags)
+		mediumGroup[i] = makeReachmentGroup(int(countMediumHashtagGroup), mediumReachmentHashtags)
+		lowGroup[i] = makeReachmentGroup(int(countLowHashtagGroup), lowReachmentHashtags)
 	}
 
-	for i := 0; i < int(countMediumHashtagGroup); i++ {
-		randIdx := rand.Intn(len(mediumReachmentHashtags))
-		fmt.Println("len medium:",len(mediumReachmentHashtags));
-		fmt.Println("medium:",randIdx);
+	// tiap level digabungkan sehingga menjadi n grup yang sudah mix
+	for i := 0; i < nGroupResult; i++{
+		finalGroup[i] = append(finalGroup[i], highGroup[i]...)
+		finalGroup[i] = append(finalGroup[i], mediumGroup[i]...)
+		finalGroup[i] = append(finalGroup[i], lowGroup[i]...)
 	}
 
-	for i := 0; i < int(countLowHashtagGroup); i++ {
-		randIdx := rand.Intn(len(lowReachmentHashtags))
-		fmt.Println("len low:",len(lowReachmentHashtags));
-		fmt.Println("low:",randIdx);
-	}
-	
+	ctx, _ := json.MarshalIndent(highGroup, "", "\t")
+	fmt.Println("json high group:", string(ctx))
 
-	// fmt.Println(math.Round(countHighHashtagGroup));
-	// fmt.Println(math.Round(countMediumHashtagGroup));
-	// fmt.Println(math.Round(countLowHashtagGroup));
+	ctx, _ = json.MarshalIndent(mediumGroup, "", "\t")
+	fmt.Println("json medium group:", string(ctx))
+
+	ctx, _ = json.MarshalIndent(lowGroup, "", "\t")
+	fmt.Println("json low group:", string(ctx))
+
+	ctx, _ = json.MarshalIndent(finalGroup, "", "\t")
+	fmt.Println("json final group:", string(ctx))
+
+	ctx, _ = json.MarshalIndent(lowGroup, "", "\t")
+	fmt.Println("json buang:", string(ctx))
+}
+
+func makeReachmentGroup(countHashtagGroup int, reachmentHashtagsDB []string) (reachmentGroup []string){
+	var idxIncluded []int
+
+	for len(reachmentGroup) != countHashtagGroup {
+		randIdx := rand.Intn(len(reachmentHashtagsDB))
+		if !indexContains(idxIncluded, randIdx){
+			idxIncluded = append(idxIncluded, randIdx)
+			reachmentGroup = append(reachmentGroup, reachmentHashtagsDB[randIdx])
+		}
+	}
+
+	return reachmentGroup
 }
