@@ -3,10 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
+	"net/http"
 	"strings"
 
 	"github.com/AlbertusKevin/hashtag-grouper/constant"
+	"github.com/gorilla/mux"
 )
 
 func createMapHashtagGroup() map[string]map[string]string{
@@ -46,8 +49,17 @@ func createMapHashtagGroup() map[string]map[string]string{
 }
 
 func main() {
+	router := mux.NewRouter()
+
+	router.HandleFunc("/register",func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "Hello");
+	}).Methods("GET")
+
 	hashtagGroupPerNiche := createMapHashtagGroup()
 	makeHashtagNicheGroup(5, 14, hashtagGroupPerNiche[constant.MOTIVATION])
+	
+	fmt.Println("Connected to port 8081")
+	log.Fatal(http.ListenAndServe(":8081", router))
 }
 
 func makeHashtagNicheGroup(nGroupResult int, nHashtag int, hashtagGroupPerNiche map[string]string){
