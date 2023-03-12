@@ -9,10 +9,12 @@ import (
 	"strings"
 
 	"github.com/AlbertusKevin/hashtag-grouper/constant"
+	"github.com/AlbertusKevin/hashtag-grouper/handler"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 )
 
-func createMapHashtagGroup() map[string]map[string]string{
+func createMapHashtagGroup() map[string]map[string]string {
 	hashtagGroupPerNiche := map[string]map[string]string{}
 
 	hashtagGroupPerNiche[constant.MINDSET] = map[string]string{}
@@ -51,18 +53,16 @@ func createMapHashtagGroup() map[string]map[string]string{
 func main() {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/register",func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "Hello");
-	}).Methods("GET")
+	router.HandleFunc("/category", handler.Get).Methods("GET")
 
 	hashtagGroupPerNiche := createMapHashtagGroup()
 	makeHashtagNicheGroup(5, 14, hashtagGroupPerNiche[constant.MOTIVATION])
-	
+
 	fmt.Println("Connected to port 8081")
 	log.Fatal(http.ListenAndServe(":8081", router))
 }
 
-func makeHashtagNicheGroup(nGroupResult int, nHashtag int, hashtagGroupPerNiche map[string]string){
+func makeHashtagNicheGroup(nGroupResult int, nHashtag int, hashtagGroupPerNiche map[string]string) {
 	// hasil grup akhir
 	finalGroup := map[int][]string{}
 
@@ -79,24 +79,24 @@ func makeHashtagNicheGroup(nGroupResult int, nHashtag int, hashtagGroupPerNiche 
 	var total float64 = highRatio + mediumRatio + lowRatio
 
 	// hitung jumlah hashtag dalam grup sesuai ratio dari masing-masing tingkat reachment
-	countHighHashtagGroup := (highRatio/total) * float64(nHashtag)
-	countMediumHashtagGroup := (mediumRatio/total) * float64(nHashtag)
-	countLowHashtagGroup := (lowRatio/total) * float64(nHashtag)
+	countHighHashtagGroup := (highRatio / total) * float64(nHashtag)
+	countMediumHashtagGroup := (mediumRatio / total) * float64(nHashtag)
+	countLowHashtagGroup := (lowRatio / total) * float64(nHashtag)
 
 	// jadikan string menjadi slice of string
-	highReachmentHashtags := strings.Split(hashtagGroupPerNiche[constant.HIGH_REACHMENT]," ")
-	mediumReachmentHashtags := strings.Split(hashtagGroupPerNiche[constant.MED_REACHMENT]," ")
-	lowReachmentHashtags := strings.Split(hashtagGroupPerNiche[constant.LOW_REACHMENT]," ")
+	highReachmentHashtags := strings.Split(hashtagGroupPerNiche[constant.HIGH_REACHMENT], " ")
+	mediumReachmentHashtags := strings.Split(hashtagGroupPerNiche[constant.MED_REACHMENT], " ")
+	lowReachmentHashtags := strings.Split(hashtagGroupPerNiche[constant.LOW_REACHMENT], " ")
 
 	// buat n grup per masing-masing level
-	for i := 0; i < nGroupResult; i++{
+	for i := 0; i < nGroupResult; i++ {
 		highGroup[i] = makeReachmentGroup(int(countHighHashtagGroup), highReachmentHashtags)
 		mediumGroup[i] = makeReachmentGroup(int(countMediumHashtagGroup), mediumReachmentHashtags)
 		lowGroup[i] = makeReachmentGroup(int(countLowHashtagGroup), lowReachmentHashtags)
 	}
 
 	// tiap level digabungkan sehingga menjadi n grup yang sudah mix
-	for i := 0; i < nGroupResult; i++{
+	for i := 0; i < nGroupResult; i++ {
 		finalGroup[i] = append(finalGroup[i], highGroup[i]...)
 		finalGroup[i] = append(finalGroup[i], mediumGroup[i]...)
 		finalGroup[i] = append(finalGroup[i], lowGroup[i]...)
@@ -118,12 +118,12 @@ func makeHashtagNicheGroup(nGroupResult int, nHashtag int, hashtagGroupPerNiche 
 	fmt.Println("json buang:", string(ctx))
 }
 
-func makeReachmentGroup(countHashtagGroup int, reachmentHashtagsDB []string) (reachmentGroup []string){
+func makeReachmentGroup(countHashtagGroup int, reachmentHashtagsDB []string) (reachmentGroup []string) {
 	var idxIncluded []int
 
 	for len(reachmentGroup) != countHashtagGroup {
 		randIdx := rand.Intn(len(reachmentHashtagsDB))
-		if !indexContains(idxIncluded, randIdx){
+		if !indexContains(idxIncluded, randIdx) {
 			idxIncluded = append(idxIncluded, randIdx)
 			reachmentGroup = append(reachmentGroup, reachmentHashtagsDB[randIdx])
 		}
